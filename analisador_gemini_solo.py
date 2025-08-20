@@ -17,13 +17,46 @@ def upload_video(path: Path):
 
 def analyze_video(video_path: Path, rules: list):
     video_res = upload_video(video_path)
+    schema = {
+        "type": "object",
+        "properties": {
+            "video_name": {"type": "string"},
+            "validation_results": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                "status": {"type": "string", "enum": ["PASS", "FAIL", "ERROR"]},
+                "found":  {"type": "string"},
+                "expected":{"type": "string"},
+                "reason":  {"type": "string"}
+                },
+                "required": ["status", "found", "expected"]
+            }
+            }
+        },
+        "required": ["video_name", "validation_results"]
+    }
+
     model = genai.GenerativeModel(
         model_name="gemini-1.5-pro-latest",
-        generation_config={"response_mime_type": "application/json"}
+        generation_config={
+            "response_mime_type": "application/json",
+            "response_schema": schema,
+            "temperature": 0,
+            "top_p": 0,
+            "top_k": 1,
+            "candidate_count": 1,
+            # opcional: "max_output_tokens": 1024,
+        }
     )
-    
+
     prompt = f"""
-    You are a video QA auditor, focused on validating Japanese texts.
+    You are a video QA auditor focused on *exact* transcription of visible Japanese text.
+    Follow the rules strictly. Never guess or infer text that is not visible on screen.
+    Process the rules in the same order they are provided. 
+    If no match is found, set "status" = "ERROR" and "found" = "" (empty string).
+
     Analyze the video and validate it using the rules below (JSON):
 
     {json.dumps(rules, ensure_ascii=False, indent=2)}
