@@ -55,7 +55,7 @@ def analyze_video(video_path: Path, rules: list):
     You are a video QA auditor focused on *exact* transcription of visible Japanese text.
     Follow the rules strictly. Never guess or infer text that is not visible on screen.
     Process the rules in the same order they are provided. 
-    If no match is found, set "status" = "ERROR" and "found" = "" (empty string).
+    If no match is found, set "status" = "ERROR" and "reason" = "Not Found"
 
     Analyze the video and validate it using the rules below (JSON):
 
@@ -63,7 +63,7 @@ def analyze_video(video_path: Path, rules: list):
 
     Rules:
     1) Ignore "EN".
-    2) If "ja_new_proposal" has a value, it is the expected text; if "JA" is found instead, it is a failure.
+    2) If "ja_new_proposal" yhas a value, it is the expected text; if "JA" is found instead, it is a failure.
     3) If "ja_new_proposal" is null/absent, the expected text is "JA".
     4) If the expected text is not found, status = "ERROR".
 
